@@ -141,15 +141,20 @@ class AuthenticationHelper extends BiometricPrompt.AuthenticationCallback
         break;
       case BiometricPrompt.ERROR_NO_SPACE:
       case BiometricPrompt.ERROR_NO_BIOMETRICS:
-        if (promptInfo.isDeviceCredentialAllowed()) return;
-        if (call.argument("useErrorDialogs")) {
-          showGoToSettingsDialog(
-              (String) call.argument("biometricRequired"),
-              (String) call.argument("goToSettingDescription"));
-          return;
-        }
-        completionHandler.onError("NotEnrolled", "No Biometrics enrolled on this device.");
-        break;
+        final AuthenticationErrorHandler errorHandler = new AuthenticationErrorHandler();
+        errorHandler.handleNotEnrolledError(
+            (FragmentActivity) activity,
+            promptInfo.isDeviceCredentialAllowed(),
+            call,
+            completionHandler,
+            new Runnable() {
+              @Override
+              public void run() {
+                stop();
+              }
+            }
+        );
+        return;
       case BiometricPrompt.ERROR_HW_UNAVAILABLE:
       case BiometricPrompt.ERROR_HW_NOT_PRESENT:
         completionHandler.onError("NotAvailable", "Security credentials not available.");
