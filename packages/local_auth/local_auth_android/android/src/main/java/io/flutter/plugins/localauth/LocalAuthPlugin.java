@@ -142,7 +142,7 @@ public class LocalAuthPlugin implements MethodCallHandler, FlutterPlugin, Activi
 
     if (!isDeviceSupported()) {
       authInProgress.set(false);
-      result.error("NotAvailable", "Required security features not enabled", null);
+      result.error(AuthResultErrorCodes.NOT_AVAILABLE, "Required security features not enabled", null);
       return;
     }
 

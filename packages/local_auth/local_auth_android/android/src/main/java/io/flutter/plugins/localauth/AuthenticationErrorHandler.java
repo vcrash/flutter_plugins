@@ -17,6 +17,31 @@ import androidx.fragment.app.FragmentActivity;
 import io.flutter.plugin.common.MethodCall;
 
 public class AuthenticationErrorHandler {
+  void handleCredentialsNotAvailableError(
+      final FragmentActivity activity,
+      boolean canTryUpdateSettings,
+      final MethodCall call,
+      final AuthenticationHelper.AuthCompletionHandler completionHandler,
+      @Nullable final Runnable onStop
+  ) {
+    boolean useErrorDialogs = call.argument("useErrorDialogs");
+    if (canTryUpdateSettings && useErrorDialogs) {
+      showGoToSettingsDialog(
+          activity,
+          (String) call.argument("deviceCredentialsRequired"),
+          (String) call.argument("deviceCredentialsSetupDescription"),
+          call,
+          completionHandler,
+          onStop
+      );
+      return;
+    }
+    completionHandler.onError(AuthResultErrorCodes.NOT_AVAILABLE, "Security credentials not available.");
+    if (onStop != null) {
+      onStop.run();
+    }
+  }
+
   void handleNotEnrolledError(
       final FragmentActivity activity,
       boolean isDeviceCredentialAllowed,
@@ -53,8 +78,8 @@ public class AuthenticationErrorHandler {
       @Nullable final Runnable onStop
   ) {
     View view = LayoutInflater.from(activity).inflate(R.layout.go_to_setting, null, false);
-    TextView message = (TextView) view.findViewById(R.id.fingerprint_required);
-    TextView description = (TextView) view.findViewById(R.id.go_to_setting_description);
+    TextView message = view.findViewById(R.id.fingerprint_required);
+    TextView description = view.findViewById(R.id.go_to_setting_description);
     message.setText(title);
     description.setText(descriptionText);
     Context context = new ContextThemeWrapper(activity, R.style.AlertDialogCustom);

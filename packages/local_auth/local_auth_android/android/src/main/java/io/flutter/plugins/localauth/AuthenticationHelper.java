@@ -129,36 +129,43 @@ class AuthenticationHelper extends BiometricPrompt.AuthenticationCallback
   @SuppressLint("SwitchIntDef")
   @Override
   public void onAuthenticationError(int errorCode, CharSequence errString) {
+    final AuthenticationErrorHandler errorHandler = new AuthenticationErrorHandler();
+    final Runnable onStopCallback = new Runnable() {
+      @Override
+      public void run() {
+        stop();
+      }
+    };
     switch (errorCode) {
       case BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL:
-        if (call.argument("useErrorDialogs")) {
-          showGoToSettingsDialog(
-              (String) call.argument("deviceCredentialsRequired"),
-              (String) call.argument("deviceCredentialsSetupDescription"));
-          return;
-        }
-        completionHandler.onError("NotAvailable", "Security credentials not available.");
-        break;
+        errorHandler.handleCredentialsNotAvailableError(
+            activity,
+            true,
+            call,
+            completionHandler,
+            onStopCallback
+        );
+        return;
       case BiometricPrompt.ERROR_NO_SPACE:
       case BiometricPrompt.ERROR_NO_BIOMETRICS:
-        final AuthenticationErrorHandler errorHandler = new AuthenticationErrorHandler();
         errorHandler.handleNotEnrolledError(
-            (FragmentActivity) activity,
+            activity,
             promptInfo.isDeviceCredentialAllowed(),
             call,
             completionHandler,
-            new Runnable() {
-              @Override
-              public void run() {
-                stop();
-              }
-            }
+            onStopCallback
         );
         return;
       case BiometricPrompt.ERROR_HW_UNAVAILABLE:
       case BiometricPrompt.ERROR_HW_NOT_PRESENT:
-        completionHandler.onError("NotAvailable", "Security credentials not available.");
-        break;
+        errorHandler.handleCredentialsNotAvailableError(
+            activity,
+            false,
+            call,
+            completionHandler,
+            onStopCallback
+        );
+        return;
       case BiometricPrompt.ERROR_LOCKOUT:
         completionHandler.onError(
             "LockedOut",
