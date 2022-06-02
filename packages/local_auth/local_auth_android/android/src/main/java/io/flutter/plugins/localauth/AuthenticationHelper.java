@@ -168,12 +168,12 @@ class AuthenticationHelper extends BiometricPrompt.AuthenticationCallback
         return;
       case BiometricPrompt.ERROR_LOCKOUT:
         completionHandler.onError(
-            "LockedOut",
+            AuthResultErrorCodes.LOCKED_OUT,
             "The operation was canceled because the API is locked out due to too many attempts. This occurs after 5 failed attempts, and lasts for 30 seconds.");
         break;
       case BiometricPrompt.ERROR_LOCKOUT_PERMANENT:
         completionHandler.onError(
-            "PermanentlyLockedOut",
+            AuthResultErrorCodes.PERMANENTLY_LOCKED_OUT,
             "The operation was canceled because ERROR_LOCKOUT occurred too many times. Biometric authentication is disabled until the user unlocks with strong authentication (PIN/Pattern/Password)");
         break;
       case BiometricPrompt.ERROR_CANCELED:
